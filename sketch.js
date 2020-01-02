@@ -1,6 +1,9 @@
-let numbers, colWidth, sorter, nCols, scanning, points, done, speed, completed, algorithm;
+let numbers, colWidth, sorter, nCols, points, done, speed, completed, algorithm;
 
-document.getElementById('start').addEventListener('click', () => loop());
+document.getElementById('start').addEventListener('click', () => {
+    speed = parseInt(document.getElementById('speed').value);
+    loop();
+});
 document.getElementById('speed').addEventListener('input', () => speed = document.getElementById('speed').value);
 document.getElementById('reload').addEventListener('click', () => resetSketch());
 document.getElementById('items').addEventListener('input', () => resetSketch());
@@ -10,23 +13,19 @@ function setup() {
     createCanvas(windowWidth, windowHeight-100).position(0, 100);
     resetSketch();
     noStroke();
-    noLoop();
-    
-    //frameRate(0.8);
-    //noLoop();
+    noLoop();   
 }
 
 function draw() {
     clear();
+    background(0);
 
     for (let i = 0; i < speed; i++) done = sorter.next().done;
 
     if(!done){
-        background(0);
-        drawColumns();      
+        drawColumns();
     }else{
-        background(0);
-        drawColumns(true);
+        drawColumns();
         calculatePoints();
         drawPoints();
         drawLines();
@@ -43,15 +42,15 @@ function windowResized(){
 }
 
 function resetSketch(){
+    noLoop();
     nCols = parseInt(document.getElementById('items').value);
-    scanning = new Array();
     points = new Array();
     completed = 0;
     done = false;
     algorithm = document.getElementById('algorithm').value;
     colWidth = width / nCols;
     numbers = Array(nCols).fill().map(() => random(0.05, 0.95));
-    speed = parseInt(document.getElementById('speed').value);
+    speed = 0;   
     switch(algorithm){
         case 'Bubble Sort': sorter = bubbleSort(); break;
         case 'Insertion Sort': sorter = insertionSort(); break;
@@ -59,7 +58,6 @@ function resetSketch(){
     clear();
     background(0); 
     drawColumns();
-    noLoop();
 }
 
 function drawColumns(){
@@ -74,7 +72,7 @@ function drawColumns(){
             if(algorithm === 'Bubble Sort'){
                 if(index > numbers.length - completed - 1) fill(hue, 100, 50);
             }else if(algorithm === 'Insertion Sort'){
-                if(index <= completed) fill(hue, 100, 50);
+                if(index < completed) fill(hue, 100, 50);
             }
         }else{
             fill(hue, 100, 50);
@@ -118,13 +116,10 @@ function* bubbleSort() {
                 let t = numbers[j-1];
 				numbers[j-1] = numbers[j];
                 numbers[j] = t;            
-                
-                scanning = [];
-                scanning.push(j);
                 yield;
             }           
 		}
-	}
+    }
 }
 
 function* insertionSort() { 
@@ -137,8 +132,6 @@ function* insertionSort() {
         while (j >= 0 && numbers[j] > key) { 
             numbers[j+1] = numbers[j];   
             j--;  
-            scanning = [];
-            scanning.push(j, j+1);
             yield;            
         } 
       
