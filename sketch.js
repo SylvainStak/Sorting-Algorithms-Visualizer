@@ -43,17 +43,19 @@ function windowResized(){
 
 function resetSketch(){
     noLoop();
+    algorithm = document.getElementById('algorithm').value;
     nCols = parseInt(document.getElementById('items').value);
     points = new Array();
     completed = 0;
     done = false;
-    algorithm = document.getElementById('algorithm').value;
     colWidth = width / nCols;
     numbers = Array(nCols).fill().map(() => random(0.05, 0.95));
     speed = 0;   
     switch(algorithm){
         case 'Bubble Sort': sorter = bubbleSort(); break;
         case 'Insertion Sort': sorter = insertionSort(); break;
+        case 'Selection Sort': sorter = selectionSort(); break;
+        case 'Quick Sort': sorter = quickSort(0, numbers.length-1); break;
     }
     clear();
     background(0); 
@@ -72,6 +74,10 @@ function drawColumns(){
             if(algorithm === 'Bubble Sort'){
                 if(index > numbers.length - completed - 1) fill(hue, 100, 50);
             }else if(algorithm === 'Insertion Sort'){
+                if(index < completed) fill(hue, 100, 50);
+            }else if(algorithm === 'Selection Sort'){
+                if(index < completed) fill(hue, 100, 50);
+            }else if(algorithm === 'Quick Sort'){
                 if(index < completed) fill(hue, 100, 50);
             }
         }else{
@@ -137,4 +143,59 @@ function* insertionSort() {
       
         numbers[j+1] = key;
     } 
+}
+
+function* selectionSort(){
+    let i,m,j;
+    for (i = -1; ++i < numbers.length;) {
+      for (m = j = i; ++j < numbers.length;) {
+        if (numbers[m] > numbers[j]) m = j;
+      }
+      [numbers[m], numbers[i]] = [numbers[i], numbers[m]];
+      yield;
+      completed = i+2;
+   }
+}
+
+
+
+function swap(leftIndex, rightIndex){
+    var temp = numbers[leftIndex];
+    numbers[leftIndex] = numbers[rightIndex];
+    numbers[rightIndex] = temp;
+}
+function partition(left, right) {
+    var pivot   = numbers[Math.floor((right + left) / 2)],
+        i       = left,
+        j       = right;
+    while (i <= j) {
+        while (numbers[i] < pivot) {
+            i++;
+        }
+        while (numbers[j] > pivot) {
+            j--;
+        }
+        if (i <= j) {
+            swap(i, j);
+            i++;
+            j--;
+        }
+    }
+    return i;
+}
+
+function* quickSort(left, right) {
+    var index;
+
+    if (numbers.length > 1) {
+        yield;
+        index = partition(left, right);
+        completed = index;
+        if (left < index - 1) {
+            yield* quickSort(left, index - 1);
+        }
+        if (index < right) {
+            yield* quickSort(index, right);
+        }
+    }
 }
